@@ -14,36 +14,34 @@ class FirebaseApp extends StatelessWidget {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          centerTitle: true,
-          title: Text(
-            'Mestre de Obra',
-            textAlign: TextAlign.center,
-          ),
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(Icons.refresh),
-              onPressed: () async {
-// TODO Implement a loading indicator when the update buttom is pressed
-                await network.updateDatabase();
-                _scaffoldKey.currentState.showSnackBar(SnackBar(
-                  content: Text(network.updatedDB
-                      ? 'Arquivos foram atualizados'
-                      : 'Arquivos já estão atualizados'),
-                ));
-              },
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent,
+    return ChangeNotifierProvider<FileData>(
+      create: (context) => FileData(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          key: _scaffoldKey,
+          appBar: AppBar(
+            centerTitle: true,
+            title: Text(
+              'Mestre de Obra',
+              textAlign: TextAlign.center,
             ),
-          ],
-        ),
-        body: ChangeNotifierProvider<FileData>(
-          create: (context) => FileData(),
-          child: FileWidget(),
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(Icons.refresh),
+                onPressed: () async {
+// TODO Implement a loading indicator when the update buttom is pressed
+                  await network.updateDatabase();
+                  _scaffoldKey.currentState.showSnackBar(SnackBar(
+                    content: Text(network.updatedDB),
+                  ));
+                },
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+              ),
+            ],
+          ),
+          body: FileWidget(),
         ),
       ),
     );
@@ -60,7 +58,6 @@ class _FileWidgetState extends State<FileWidget> {
   Widget build(BuildContext context) {
     final fileData = Provider.of<FileData>(context);
     network.getFileData(fileData);
-
     return StreamBuilder(
       stream: network.firestoreSnapshots,
       builder: (context, snapshot) {
@@ -97,9 +94,9 @@ class _FileWidgetState extends State<FileWidget> {
                     _file.updated,
                   );
                   print(fileList[index].url);
-                  network.requestPermission();
+                  await network.requestPermission();
                   SnackBar snackBar =
-                      SnackBar(content: Text('Iniciando Download'));
+                      SnackBar(content: Text(network.downloadFileMessage));
                   Scaffold.of(context).showSnackBar(snackBar);
                 },
                 child: Container(
@@ -121,3 +118,6 @@ class _FileWidgetState extends State<FileWidget> {
     );
   }
 }
+
+// TODO Create a sing up method using firebase auth (email and google sign in)
+// TODO Create a collection in firestore to hold the user permissions to projects

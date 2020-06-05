@@ -14,11 +14,14 @@ class Network {
 
   FileData _fileData;
 
-  bool updatedDB;
+  String updatedDB;
+  String downloadFileMessage;
 
   get firestoreSnapshots => _firestore.collection('files').snapshots();
 
   Future<void> updateDatabase() async {
+    List _filesStored = [];
+
 // ! The name of every file has to be name_A-project_B.C (being A the file name, B the project and C the file type)
     try {
       await _storage.ref().child('files').listAll().then((value) async {
@@ -40,14 +43,16 @@ class Network {
             "updated": _date,
           };
 
+          _filesStored.add(_data['downloadUrl']);
+
           if (!(await duplicateCheck(_url))) {
             await _firestore.collection('files').add(_data);
-            updatedDB = true;
+            updatedDB = 'Os arquivos foram atualizados';
           } else {
-            print('erro');
-            updatedDB = false;
+            updatedDB = 'Arquivos já estão atualizados';
           }
         }
+        deleteFileRecord(_filesStored);
       });
     } catch (e) {
       print(e);
@@ -96,6 +101,7 @@ class Network {
       String _file = '${downloadDir.path}/${_name}_$_updated.$_fileType';
 // * Checks if the files exists before downloading it
       if (!(await File(_file).exists())) {
+        downloadFileMessage = 'Fazendo download';
         await dio.download(
           _downloadUrl,
           _file,
@@ -106,6 +112,7 @@ class Network {
           },
         );
       } else {
+        downloadFileMessage = 'Abrindo arquivo';
         await OpenFile.open(_file);
       }
     } catch (e) {
@@ -114,7 +121,7 @@ class Network {
   }
 
 // * Checks if app has permission to access the download folder, if not it asks for it and call the downloadFile function
-  void requestPermission() async {
+  Future<void> requestPermission() async {
     var status = await Permission.storage.status;
     if (!status.isGranted) {
       await Permission.storage.request().then((value) {
@@ -131,7 +138,18 @@ class Network {
     _fileData = fileData;
   }
 
-// TODO Implement a delete functionality to delete the document from the database and storage (does it make sense??)
-  void deleteFileRecord() {}
-
+  void deleteFileRecord(List _filesStored) async {
+    var myCollection = await _firestore.collection('files').getDocuments();
+    var documentList = myCollection.documents;
+    for (var document in documentList) {
+      if (!_filesStored.contains(document.data['downloadUrl'])) {
+        await _firestore
+            .collection('files')
+            .document(document.documentID)
+            .delete();
+        updatedDB = 'Os arquivos foram atualizados';
+      }
+    }
+  }
+// TODO handle when user tries to download file that does not exis anymore;
 }
