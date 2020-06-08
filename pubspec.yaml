@@ -43,6 +43,7 @@ dependencies:
       path: packages/firebase_storage
   intl: ^0.16.1
   open_file: ^3.0.1
+  modal_progress_hud: ^0.1.3
 
 
 

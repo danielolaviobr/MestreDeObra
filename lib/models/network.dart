@@ -15,7 +15,6 @@ class Network {
   FileData _fileData;
 
   String updatedDB;
-  String downloadFileMessage;
 
   get firestoreSnapshots => _firestore.collection('files').snapshots();
 
@@ -98,10 +97,10 @@ class Network {
     String _fileType = _fileData.data['fileType'];
     try {
       var downloadDir = await DownloadsPathProvider.downloadsDirectory;
-      String _file = '${downloadDir.path}/${_name}_$_updated.$_fileType';
+      String _file =
+          '${downloadDir.path}/${_name}_${_updated.replaceAll("/", "-")}.$_fileType';
 // * Checks if the files exists before downloading it
       if (!(await File(_file).exists())) {
-        downloadFileMessage = 'Fazendo download';
         await dio.download(
           _downloadUrl,
           _file,
@@ -112,7 +111,6 @@ class Network {
           },
         );
       } else {
-        downloadFileMessage = 'Abrindo arquivo';
         await OpenFile.open(_file);
       }
     } catch (e) {
@@ -151,5 +149,12 @@ class Network {
       }
     }
   }
+
+  Future<List<DocumentSnapshot>> queryDeviceID(String deviceID) async {
+    var myCollection = await _firestore.collection('user-data').getDocuments();
+    return myCollection.documents;
+  }
+
 // TODO handle when user tries to download file that does not exis anymore;
+
 }
