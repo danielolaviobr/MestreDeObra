@@ -23,8 +23,8 @@ class FileCard extends StatelessWidget {
             _file.updated,
           );
           await network.requestPermission().then((value) {
-            SnackBar snackBar = SnackBar(content: Text('Abrindo Arquivo'));
-            Scaffold.of(context).showSnackBar(snackBar);
+            Scaffold.of(context)
+                .showSnackBar(SnackBar(content: Text('Abrindo Arquivo')));
           });
         },
         child: Container(

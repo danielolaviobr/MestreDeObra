@@ -79,4 +79,12 @@ class Auth {
   bool isError(String validation) {
     return _errorList.contains(validation) ? true : false;
   }
+
+  Future<String> currentUserMail() async {
+    if (_currentUser() != null) {
+      return await _currentUser().then((value) => value.email);
+    } else {
+      return '';
+    }
+  }
 }

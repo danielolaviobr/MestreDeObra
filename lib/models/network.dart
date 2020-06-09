@@ -150,11 +150,23 @@ class Network {
     }
   }
 
-  Future<List<DocumentSnapshot>> queryDeviceID(String deviceID) async {
-    var myCollection = await _firestore.collection('user-data').getDocuments();
-    return myCollection.documents;
+// TODO handle when user tries to download file that does not exis anymore ? is it necessary?
+
+  queryUserPermissions(Future<String> userMail) async {
+    try {
+      var _userPermissonsCollection =
+          await _firestore.collection('user-permissions').getDocuments();
+      var _permissionsList = _userPermissonsCollection.documents;
+      if (await userMail == '') {
+        return null;
+      }
+      for (var permissions in _permissionsList) {
+        if (permissions.data['email'] == await userMail) {
+          return await permissions.data['permissions'].toList();
+        }
+      }
+    } catch (error) {
+      print(error);
+    }
   }
-
-// TODO handle when user tries to download file that does not exis anymore;
-
 }

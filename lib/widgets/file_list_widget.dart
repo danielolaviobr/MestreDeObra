@@ -12,11 +12,70 @@ class FileSListWidget extends StatefulWidget {
 }
 
 class _FileSListWidgetState extends State<FileSListWidget> {
-  Auth auth = Auth();
+  List allowed = [];
+
+  dynamic getPermissions() async {
+    var permissions =
+        await network.queryUserPermissions(auth.currentUserMail());
+    if (permissions != null) {
+      for (var permission in permissions) {
+        allowed.add(permission);
+      }
+    }
+  }
+
+  Widget streamData(AsyncSnapshot snapshot, FileData fileData) {
+    if (!snapshot.hasData) {
+      return Center(
+        child: CircularProgressIndicator(
+          backgroundColor: Colors.lightBlueAccent,
+        ),
+      );
+    }
+    final files = snapshot.data.documents;
+    List<Files> fileList = [];
+
+    for (var file in files) {
+      var _data = file.data;
+
+      if (allowed.contains(_data['project'])) {
+        fileList.add(Files(
+          title: _data['title'],
+          url: _data['downloadUrl'],
+          fileType: _data['fileType'],
+          updated: _data['updated'],
+        ));
+      }
+    }
+
+    if (allowed != []) {
+      return ListView.builder(
+        itemCount: fileList.length,
+        itemBuilder: (context, index) {
+          return FileCard(
+            fileData: fileData,
+            fileList: fileList,
+            index: index,
+            network: network,
+          );
+        },
+      );
+    } else {
+      return Center(
+        child: Text(
+          'Nenhum projeto habilitado',
+          style: TextStyle(
+            fontSize: 20.0,
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    getPermissions();
   }
 
   @override
@@ -26,35 +85,8 @@ class _FileSListWidgetState extends State<FileSListWidget> {
     return StreamBuilder(
       stream: network.firestoreSnapshots,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return Center(
-            child: CircularProgressIndicator(
-              backgroundColor: Colors.lightBlueAccent,
-            ),
-          );
-        }
-        final files = snapshot.data.documents;
-        List<Files> fileList = [];
-        for (var file in files) {
-          var _data = file.data;
-          fileList.add(Files(
-            title: _data['title'],
-            url: _data['downloadUrl'],
-            fileType: _data['fileType'],
-            updated: _data['updated'],
-          ));
-        }
-        return ListView.builder(
-          itemCount: fileList.length,
-          itemBuilder: (context, index) {
-            return FileCard(
-              fileData: fileData,
-              fileList: fileList,
-              index: index,
-              network: network,
-            );
-          },
-        );
+        return streamData(snapshot, fileData);
+        // ! Dados não atualizam após usuário logar em nova conta (atualizar a stream passando data de ultimo login)
       },
     );
   }

@@ -19,6 +19,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   String _password;
   String _passwordCheck;
 
+  void _submit() => setState(() => _saving = _saving ? false : true);
+
   bool notNullOrEmpty(String value) {
     if (value != null && value != '') {
       return true;
@@ -98,18 +100,23 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                         content: Text(
                                             'As senhas devem ser iguais')));
                               } else {
+                                _submit();
                                 var registrationCheck =
                                     await auth.registerUser(_email, _password);
                                 if (!auth.isError(registrationCheck)) {
                                   await auth.loginUser(_email, _password);
+                                  _submit();
                                   Navigator.pushNamedAndRemoveUntil(
                                     context,
                                     MainScreen.id,
                                     (_) => false,
                                   );
+                                }else{
+                                  // ! handle this else
                                 }
                               }
                             } else {
+                              _submit();
                               _scaffoldRegisterKey.currentState
                                   .showSnackBar(SnackBar(
                                 content: Text(
