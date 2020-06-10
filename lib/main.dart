@@ -27,7 +27,4 @@ class FirebaseApp extends StatelessWidget {
   }
 }
 
-// TODO Create a sing up method using firebase auth (email and google sign in)
-// TODO Create a collection in firestore to hold the user permissions to projects
-// TODO Implement a validation for the users internet access
 // TODO Setup Firebase for IOS

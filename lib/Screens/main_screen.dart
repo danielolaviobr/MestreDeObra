@@ -16,23 +16,28 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   String userMail = '';
+  String project = '';
+  bool loading = true;
 
-  void getUserMail() async {
-    userMail = await auth.currentUserMail();
-    setState(() {});
+  get _setState {
+    if (loading) {
+      loading = false;
+      return setState(() {});
+    }
   }
 
-  @override
-  void initState() {
-    super.initState();
+  void getUserData() async {
+    userMail = await auth.currentUserMail();
+    project = await network.firstUserProject(userMail) ?? 'Nenhum projeto';
+    _setState;
   }
 
   @override
   Widget build(BuildContext context) {
-    getUserMail();
+    getUserData();
     return Scaffold(
       key: _scaffoldKey,
-      drawer: MainDrawer(userMail),
+      drawer: MainDrawer(userMail, project),
       appBar: AppBar(
         backgroundColor: kLoginBackgroundColor,
         centerTitle: true,
@@ -69,8 +74,9 @@ class _MainScreenState extends State<MainScreen> {
 
 class MainDrawer extends StatelessWidget {
   final _userMail;
+  final _project;
 
-  const MainDrawer(this._userMail);
+  const MainDrawer(this._userMail, this._project);
 
   @override
   Widget build(BuildContext context) {
@@ -87,8 +93,12 @@ class MainDrawer extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: <Widget>[
-                        Text('Projeto'),
-                        Text(_userMail),
+                        RoundedContainer(
+                          child: Text(_project),
+                        ),
+                        RoundedContainer(
+                          child: Text(_userMail),
+                        ),
                       ],
                     ),
                   ),
@@ -100,13 +110,15 @@ class MainDrawer extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(10.0),
               child: Container(
-                width: double.infinity,
-                alignment: Alignment.center,
-                child: Text(
-                  'Desconectar',
-                  style: TextStyle(fontSize: 20.0),
-                ),
-              ),
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  child: RoundedContainer(
+                    child: Text(
+                      'Desconectar',
+                      style: TextStyle(fontSize: 20.0, color: Colors.white),
+                    ),
+                    color: Colors.lightBlue,
+                  )),
             ),
             onPressed: () async {
               await auth.logoutUser();
@@ -120,5 +132,24 @@ class MainDrawer extends StatelessWidget {
   }
 }
 
-// TODO Return a message if the user has no permissions in any project
+class RoundedContainer extends StatelessWidget {
+  final child;
+  final color;
+
+  RoundedContainer({this.child, this.color = Colors.white});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 25.0),
+      decoration: BoxDecoration(
+        color: this.color,
+        borderRadius: BorderRadius.circular(25.0),
+        boxShadow: [kDefaultShaddow],
+      ),
+      child: this.child,
+    );
+  }
+}
+
 // TODO  Implement a function to get all the registered users and insert them into the database

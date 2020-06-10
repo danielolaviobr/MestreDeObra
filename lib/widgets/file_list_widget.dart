@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app_fireship/main.dart';
-import 'package:quiz_app_fireship/models/auth.dart';
 import 'package:quiz_app_fireship/models/file_data.dart';
 import 'package:quiz_app_fireship/models/files.dart';
 import 'package:quiz_app_fireship/widgets/file_card.dart';
@@ -39,16 +38,18 @@ class _FileSListWidgetState extends State<FileSListWidget> {
       var _data = file.data;
 
       if (allowed.contains(_data['project'])) {
+        network.lastUserView(_data['downloadUrl']);
         fileList.add(Files(
           title: _data['title'],
           url: _data['downloadUrl'],
           fileType: _data['fileType'],
           updated: _data['updated'],
+          lastAuthorizedAccess: _data['lastAuthorizedAccess'],
         ));
       }
     }
 
-    if (allowed != []) {
+    if (allowed.length != 0) {
       return ListView.builder(
         itemCount: fileList.length,
         itemBuilder: (context, index) {
@@ -86,7 +87,6 @@ class _FileSListWidgetState extends State<FileSListWidget> {
       stream: network.firestoreSnapshots,
       builder: (context, snapshot) {
         return streamData(snapshot, fileData);
-        // ! Dados não atualizam após usuário logar em nova conta (atualizar a stream passando data de ultimo login)
       },
     );
   }

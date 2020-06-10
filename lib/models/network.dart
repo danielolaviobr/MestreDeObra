@@ -40,6 +40,7 @@ class Network {
             "downloadUrl": _url,
             "fileType": _fileType,
             "updated": _date,
+            "lastAccess": '',
           };
 
           _filesStored.add(_data['downloadUrl']);
@@ -168,5 +169,29 @@ class Network {
     } catch (error) {
       print(error);
     }
+  }
+
+// * Inserts the last login date to the database
+  void lastUserView(String downloadLinkChecker) async {
+    var _data = await _firestore.collection('files').getDocuments();
+    var documents = _data.documents;
+    for (var doc in documents) {
+      if (doc.data['download'] == downloadLinkChecker)
+        await _firestore
+            .collection('files')
+            .document(doc.documentID)
+            .updateData({'lastAccess': DateTime.now().toString()});
+    }
+  }
+
+  Future<String> firstUserProject(String userEmail) async {
+    var _data = await _firestore.collection('user-permissions').getDocuments();
+    var documents = _data.documents;
+    for (var document in documents) {
+      if (document.data['email'] == userEmail) {
+        return document.data['permissions'][0];
+      }
+    }
+    return null;
   }
 }

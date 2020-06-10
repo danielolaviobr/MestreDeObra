@@ -61,7 +61,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           fieldLabel: 'E-mail',
                           isPassword: false,
                           onChanged: (typedEmail) {
-                            _email = typedEmail;
+                            _email = typedEmail.trim();
                           },
                         ),
                       ),
@@ -71,7 +71,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           fieldLabel: 'Senha',
                           isPassword: true,
                           onChanged: (typedPassword) {
-                            _password = typedPassword;
+                            _password = typedPassword.trim();
                           },
                         ),
                       ),
@@ -81,7 +81,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           fieldLabel: 'Repita a Senha',
                           isPassword: true,
                           onChanged: (typedPassword) {
-                            _passwordCheck = typedPassword;
+                            _passwordCheck = typedPassword.trim();
                           },
                         ),
                       ),
@@ -111,7 +111,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                     MainScreen.id,
                                     (_) => false,
                                   );
-                                }else{
+                                } else {
                                   // ! handle this else
                                 }
                               }

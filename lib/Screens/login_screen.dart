@@ -66,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           fieldLabel: 'E-mail',
                           isPassword: false,
                           onChanged: (typedEmail) {
-                            _email = typedEmail;
+                            _email = typedEmail.trim();
                           },
                         ),
                       ),
@@ -76,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           fieldLabel: 'Senha',
                           isPassword: true,
                           onChanged: (typedPassword) {
-                            _password = typedPassword;
+                            _password = typedPassword.trim();
                           },
                         ),
                       ),
@@ -109,8 +109,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 }
                               } else {
                                 SnackBar loginFieldsError = SnackBar(
-                                    content: Text(
-                                        'Preencha todos os campos para realizar o login'));
+                                  content: Text(
+                                    'Preencha todos os campos para realizar o login',
+                                  ),
+                                );
                                 _scaffoldLoginKey.currentState
                                     .showSnackBar(loginFieldsError);
                               }
